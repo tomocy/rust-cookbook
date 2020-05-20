@@ -54,3 +54,14 @@ mod guess {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::guess::Guess;
+
+    #[test]
+    #[should_panic]
+    fn too_big() {
+        Guess::new(1000);
+    }
+}
