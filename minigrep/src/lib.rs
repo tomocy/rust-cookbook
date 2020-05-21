@@ -21,30 +21,18 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn search_case_sensitive<'a>(contents: &'a str, query: &str) -> Vec<&'a str> {
-    let mut matched = Vec::new();
-    for line in contents.lines() {
-        if !line.contains(query) {
-            continue;
-        }
-
-        matched.push(line);
-    }
-
-    matched
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
 }
 
 pub fn search_case_insensitive<'a>(contents: &'a str, query: &str) -> Vec<&'a str> {
     let query = query.to_lowercase();
-    let mut matched = Vec::new();
-    for line in contents.lines() {
-        if !line.to_lowercase().contains(&query) {
-            continue;
-        }
-
-        matched.push(line);
-    }
-
-    matched
+    contents
+        .lines()
+        .filter(|line| line.to_lowercase().contains(&query))
+        .collect()
 }
 
 pub struct Config {
@@ -54,15 +42,23 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("not enought arguments");
-        }
+    pub fn new(mut args: std::env::Args) -> Result<Config, &'static str> {
+        args.next();
+
+        let filename = match args.next() {
+            Some(fname) => fname,
+            None => return Err("failed to get filename"),
+        };
+        let query = match args.next() {
+            Some(query) => query,
+            None => return Err("failed to get query"),
+        };
+        let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
 
         Ok(Config {
-            filename: args[1].clone(),
-            query: args[2].clone(),
-            case_sensitive: env::var("CASE_INSENSITIVE").is_err(),
+            filename: filename,
+            query: query,
+            case_sensitive: case_sensitive,
         })
     }
 }
@@ -99,16 +95,5 @@ Trust me.";
             vec!["Rust:", "Trust me."],
             search_case_insensitive(contents, query)
         );
-    }
-
-    #[test]
-    fn new_config() {
-        let filename = String::from("filename");
-        let query = String::from("query");
-        let args: Vec<String> = vec![String::from("minigrep"), filename.clone(), query.clone()];
-        let config = Config::new(&args).unwrap();
-
-        assert_eq!(filename, config.filename);
-        assert_eq!(query, config.query);
     }
 }
