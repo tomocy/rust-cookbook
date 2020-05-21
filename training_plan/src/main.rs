@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::hash;
 use std::thread;
 use std::time;
 
@@ -42,26 +43,28 @@ fn simulated_expensive_calculation(intensity: u32) -> u32 {
     intensity
 }
 
-struct Cacher<T>
+struct Cacher<T, U>
 where
-    T: Fn(u32) -> u32,
+    T: Fn(U) -> U,
+    U: Eq + Copy + hash::Hash,
 {
     calculate: T,
-    values: HashMap<u32, u32>,
+    values: HashMap<U, U>,
 }
 
-impl<T> Cacher<T>
+impl<T, U> Cacher<T, U>
 where
-    T: Fn(u32) -> u32,
+    T: Fn(U) -> U,
+    U: Eq + Copy + hash::Hash,
 {
-    fn new(calculate: T) -> Cacher<T> {
+    fn new(calculate: T) -> Cacher<T, U> {
         Cacher {
             calculate: calculate,
             values: HashMap::new(),
         }
     }
 
-    fn value(&mut self, x: u32) -> u32 {
+    fn value(&mut self, x: U) -> U {
         match self.values.get(&x) {
             Some(v) => *v,
             None => {
@@ -80,10 +83,9 @@ mod tests {
     #[test]
     fn cache_different_values() {
         let mut cacher = Cacher::new(|x| x);
-
-        cacher.value(1);
-        cacher.value(2);
-        assert_eq!(1, cacher.value(1));
-        assert_eq!(2, cacher.value(2));
+        cacher.value("1");
+        cacher.value("2");
+        assert_eq!("1", cacher.value("1"));
+        assert_eq!("2", cacher.value("2"));
     }
 }
