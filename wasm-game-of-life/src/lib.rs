@@ -103,6 +103,25 @@ impl Universe {
     }
 }
 
+impl Universe {
+    pub fn make_all_dead(&mut self) {
+        for cell in &mut self.cells {
+            *cell = Cell::Dead;
+        }
+    }
+
+    pub fn cells_as_slice(&self) -> &[Cell] {
+        &self.cells
+    }
+
+    pub fn make_cells_alive(&mut self, cells: &[(u32, u32)]) {
+        for (row, col) in cells.iter().cloned() {
+            let i = self.get_index(row, col);
+            self.cells[i] = Cell::Alive;
+        }
+    }
+}
+
 impl fmt::Display for Universe {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for line in self.cells.as_slice().chunks(self.width as usize) {
