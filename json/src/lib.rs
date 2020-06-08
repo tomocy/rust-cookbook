@@ -43,6 +43,7 @@ impl Parser {
             lexer::Token::Number(_) => self.parse_number(),
             lexer::Token::String(_) => self.parse_string(),
             lexer::Token::Bool(_) => self.parse_bool(),
+            lexer::Token::Null => self.parse_null(),
             lexer::Token::Unknown(s) => Err(From::from(format!("token '{}' is unknown", s))),
             _ => Err(From::from("not implemented")),
         }
@@ -164,6 +165,12 @@ impl Parser {
         }
     }
 
+    fn parse_null(&mut self) -> Result<Value> {
+        self.read_token();
+
+        Ok(Value::Null)
+    }
+
     fn do_have_token(&self, token: lexer::Token) -> bool {
         self.curr_token == token
     }
@@ -181,6 +188,7 @@ pub enum Value {
     Number(u32),
     String(String),
     Bool(bool),
+    Null,
 }
 
 #[derive(Debug, PartialEq)]

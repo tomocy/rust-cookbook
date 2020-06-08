@@ -55,6 +55,16 @@ fn parse_false() {
 }
 
 #[test]
+fn parse_null() {
+    let src = "null";
+    let expected = Value::Null;
+
+    let actual = parse(src).expect("should have succeeded to parse");
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
 fn parse_empty_object() {
     let src = "{}";
     let expected = Value::Object(vec![]);
