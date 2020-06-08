@@ -12,6 +12,21 @@ fn parse_empty() {
 }
 
 #[test]
+fn parse_number() {
+    let src = "12345";
+    let expected = vec![parser::Value::Number(12345)];
+
+    let lexer = lexer::Lexer::new(src);
+    let mut parser = parser::Parser::new(lexer);
+
+    for expected in expected {
+        let actual = parser.parse().expect("should have succeeded to parse");
+
+        assert_eq!(actual, expected);
+    }
+}
+
+#[test]
 fn parse_string() {
     let src = "\"aiueo\"";
     let expected = vec![parser::Value::String("aiueo".to_string())];
