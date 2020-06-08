@@ -7,23 +7,26 @@ use std::error;
 #[derive(Debug)]
 pub struct Parser {
     lexer: lexer::Lexer,
-    token: lexer::Token,
+    curr_token: lexer::Token,
+    next_token: lexer::Token,
 }
 
 impl Parser {
     pub fn new(lexer: lexer::Lexer) -> Self {
         let mut p = Self {
             lexer,
-            token: lexer::Token::Unknown("".to_string()),
+            curr_token: lexer::Token::Unknown("".to_string()),
+            next_token: lexer::Token::Unknown("".to_string()),
         };
 
+        p.read_token();
         p.read_token();
 
         p
     }
 
     pub fn parse(&mut self) -> Result<Value, Box<dyn error::Error>> {
-        match &self.token {
+        match &self.curr_token {
             lexer::Token::EOF => Err(From::from("input should not be empty")),
             lexer::Token::Colon => Err(From::from("not implemented")),
             lexer::Token::Number(_) => Ok(self.parse_number()),
@@ -40,7 +43,7 @@ impl Parser {
     }
 
     fn read_number(&self) -> Value {
-        match &self.token {
+        match &self.curr_token {
             lexer::Token::Number(n) => Value::Number(*n),
             _ => panic!("current token should be number"),
         }
@@ -54,14 +57,15 @@ impl Parser {
     }
 
     fn read_string(&self) -> Value {
-        match &self.token {
+        match &self.curr_token {
             lexer::Token::String(s) => Value::String(s.clone()),
             _ => panic!("current token should be string"),
         }
     }
 
     fn read_token(&mut self) {
-        self.token = self.lexer.read_token()
+        self.curr_token = self.next_token.clone();
+        self.next_token = self.lexer.read_token();
     }
 }
 

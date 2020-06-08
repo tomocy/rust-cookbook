@@ -119,7 +119,7 @@ impl Lexer {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Token {
     EOF,
     Colon,
