@@ -37,15 +37,18 @@ impl Parser {
 
     fn parse(&mut self) -> Result<Value> {
         match &self.curr_token {
-            lexer::Token::EOF => Err(From::from("input should not be empty")),
             lexer::Token::LBracket => self.parse_array(),
             lexer::Token::LBrace => self.parse_object(),
             lexer::Token::Number(_) => self.parse_number(),
             lexer::Token::String(_) => self.parse_string(),
             lexer::Token::Bool(_) => self.parse_bool(),
             lexer::Token::Null => self.parse_null(),
+            lexer::Token::EOF => Err(From::from("input should not be empty")),
             lexer::Token::Unknown(s) => Err(From::from(format!("token '{}' is unknown", s))),
-            _ => Err(From::from("not implemented")),
+            _ => panic!(format!(
+                "current token '{:?}' is not valid",
+                &self.curr_token
+            )),
         }
     }
 

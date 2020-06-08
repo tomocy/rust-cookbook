@@ -137,7 +137,6 @@ impl Lexer {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
-    EOF,
     LBracket,
     RBracket,
     LBrace,
@@ -148,5 +147,6 @@ pub enum Token {
     String(String),
     Bool(bool),
     Null,
+    EOF,
     Unknown(String),
 }
