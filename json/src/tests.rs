@@ -71,3 +71,38 @@ fn parse_object_with_multiple_properties() {
 
     assert_eq!(actual, expected);
 }
+
+#[test]
+fn parse_empty_array() {
+    let src = "[]";
+    let expected = Value::Array(vec![]);
+
+    let actual = parse(src).expect("should have succeeded to parse");
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn parse_array_with_single_element() {
+    let src = "[1]";
+    let expected = Value::Array(vec![Value::Number(1)]);
+
+    let actual = parse(src).expect("should have succeeded to parse");
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn parse_array_with_multiple_elements() {
+    let src = r#"[1, "two", 3, "four"]"#;
+    let expected = Value::Array(vec![
+        Value::Number(1),
+        Value::String("two".to_string()),
+        Value::Number(3),
+        Value::String("four".to_string()),
+    ]);
+
+    let actual = parse(src).expect("should have succeeded to parse");
+
+    assert_eq!(actual, expected);
+}

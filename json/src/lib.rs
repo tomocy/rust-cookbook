@@ -38,12 +38,40 @@ impl Parser {
     fn parse(&mut self) -> Result<Value> {
         match &self.curr_token {
             lexer::Token::EOF => Err(From::from("input should not be empty")),
+            lexer::Token::LBracket => self.parse_array(),
             lexer::Token::LBrace => self.parse_object(),
             lexer::Token::Number(_) => self.parse_number(),
             lexer::Token::String(_) => self.parse_string(),
             lexer::Token::Unknown(s) => Err(From::from(format!("token '{}' is unknown", s))),
             _ => Err(From::from("not implemented")),
         }
+    }
+
+    fn parse_array(&mut self) -> Result<Value> {
+        debug_assert_eq!(lexer::Token::LBracket, self.curr_token);
+        self.read_token();
+
+        let mut elems = Vec::new();
+
+        if self.do_have_token(lexer::Token::RBracket) {
+            return Ok(Value::Array(elems));
+        }
+
+        loop {
+            let elem = self.parse()?;
+            elems.push(elem);
+
+            if self.do_have_token(lexer::Token::EOF) {
+                return Err(From::from("array should be closed with ']"));
+            }
+
+            if !self.do_have_token(lexer::Token::Comma) {
+                break;
+            }
+            self.read_token();
+        }
+
+        Ok(Value::Array(elems))
     }
 
     fn parse_object(&mut self) -> Result<Value> {
@@ -134,6 +162,7 @@ impl Parser {
 #[derive(Debug, PartialEq)]
 pub enum Value {
     Object(Vec<Property>),
+    Array(Vec<Value>),
     Number(u32),
     String(String),
 }
