@@ -15,6 +15,20 @@ fn read_empty() {
 }
 
 #[test]
+fn read_unknown() {
+    let src = "@";
+    let expected = vec![lexer::Token::Unknown("@".to_string()), lexer::Token::EOF];
+
+    let mut lexer = lexer::Lexer::new(src);
+
+    for expected in expected {
+        let actual = lexer.read_token();
+
+        assert_eq!(expected, actual);
+    }
+}
+
+#[test]
 fn read_number() {
     let src = "12345";
     let expected = vec![lexer::Token::Number(12345), lexer::Token::EOF];

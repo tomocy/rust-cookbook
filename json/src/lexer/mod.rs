@@ -20,7 +20,7 @@ impl Lexer {
             "\x00" => self.compose(Token::EOF),
             "\"" => self.compose_string(),
             _ if self.do_have_number() => self.compose_number(),
-            _ => self.compose(Token::Unknown),
+            _ => self.compose_unknown(),
         }
     }
 
@@ -77,6 +77,17 @@ impl Lexer {
         "a" <= c && c <= "z" || "A" <= c && c <= "Z"
     }
 
+    fn compose_unknown(&mut self) -> Token {
+        Token::Unknown(self.read_unknown())
+    }
+
+    fn read_unknown(&mut self) -> String {
+        let c = self.current_char().to_string();
+        self.read_char();
+
+        c
+    }
+
     fn current_char(&self) -> &str {
         if self.index >= self.src.len() {
             "\x00"
@@ -96,8 +107,8 @@ impl Lexer {
 
 #[derive(Debug, PartialEq)]
 pub enum Token {
-    Unknown,
     EOF,
     Number(u32),
     String(String),
+    Unknown(String),
 }

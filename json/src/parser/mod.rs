@@ -14,7 +14,7 @@ impl Parser {
     pub fn new(lexer: lexer::Lexer) -> Self {
         let mut p = Self {
             lexer,
-            token: lexer::Token::Unknown,
+            token: lexer::Token::Unknown("".to_string()),
         };
 
         p.read_token();
