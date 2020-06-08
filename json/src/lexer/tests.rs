@@ -101,3 +101,65 @@ fn read_object_with_multiple_properties() {
         assert_eq!(expected, actual);
     }
 }
+
+#[test]
+fn read_empty_array() {
+    let src = "[]";
+    let expected = vec![
+        lexer::Token::LBracket,
+        lexer::Token::RBracket,
+        lexer::Token::EOF,
+    ];
+
+    let mut lexer = lexer::Lexer::new(src);
+
+    for expected in expected {
+        let actual = lexer.read_token();
+
+        assert_eq!(expected, actual);
+    }
+}
+
+#[test]
+fn read_array_with_single_element() {
+    let src = "[1]";
+    let expected = vec![
+        lexer::Token::LBracket,
+        lexer::Token::Number(1),
+        lexer::Token::RBracket,
+        lexer::Token::EOF,
+    ];
+
+    let mut lexer = lexer::Lexer::new(src);
+
+    for expected in expected {
+        let actual = lexer.read_token();
+
+        assert_eq!(expected, actual);
+    }
+}
+
+#[test]
+fn read_array_with_multiple_elements() {
+    let src = r#"[1, "two", 3, "four"]"#;
+    let expected = vec![
+        lexer::Token::LBracket,
+        lexer::Token::Number(1),
+        lexer::Token::Comma,
+        lexer::Token::String("two".to_string()),
+        lexer::Token::Comma,
+        lexer::Token::Number(3),
+        lexer::Token::Comma,
+        lexer::Token::String("four".to_string()),
+        lexer::Token::RBracket,
+        lexer::Token::EOF,
+    ];
+
+    let mut lexer = lexer::Lexer::new(src);
+
+    for expected in expected {
+        let actual = lexer.read_token();
+
+        assert_eq!(expected, actual);
+    }
+}
