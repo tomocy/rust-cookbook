@@ -1,5 +1,7 @@
 mod utils;
 
+extern crate js_sys;
+
 use std::fmt;
 use wasm_bindgen::prelude::*;
 
@@ -20,11 +22,11 @@ pub struct Universe {
 impl Universe {
     pub fn new(height: u32, width: u32) -> Self {
         let cells = (0..width * height)
-            .map(|i| {
-                if i % 2 == 0 || i % 7 == 0 {
-                    Cell::Alive
-                } else {
+            .map(|_| {
+                if js_sys::Math::random() < 0.5 {
                     Cell::Dead
+                } else {
+                    Cell::Alive
                 }
             })
             .collect();
@@ -44,7 +46,7 @@ impl Universe {
         self.width
     }
 
-    pub fn cells(&self) -> *const Cell {
+    pub fn cells_as_ptr(&self) -> *const Cell {
         self.cells.as_ptr()
     }
 
