@@ -42,6 +42,7 @@ impl Parser {
             lexer::Token::LBrace => self.parse_object(),
             lexer::Token::Number(_) => self.parse_number(),
             lexer::Token::String(_) => self.parse_string(),
+            lexer::Token::Bool(_) => self.parse_bool(),
             lexer::Token::Unknown(s) => Err(From::from(format!("token '{}' is unknown", s))),
             _ => Err(From::from("not implemented")),
         }
@@ -149,6 +150,20 @@ impl Parser {
         }
     }
 
+    fn parse_bool(&mut self) -> Result<Value> {
+        let v = self.read_bool();
+        self.read_token();
+
+        Ok(v)
+    }
+
+    fn read_bool(&self) -> Value {
+        match self.curr_token {
+            lexer::Token::Bool(b) => Value::Bool(b),
+            _ => panic!("current token should be bool"),
+        }
+    }
+
     fn do_have_token(&self, token: lexer::Token) -> bool {
         self.curr_token == token
     }
@@ -165,6 +180,7 @@ pub enum Value {
     Array(Vec<Value>),
     Number(u32),
     String(String),
+    Bool(bool),
 }
 
 #[derive(Debug, PartialEq)]

@@ -35,6 +35,26 @@ fn parse_string() {
 }
 
 #[test]
+fn parse_true() {
+    let src = "true";
+    let expected = Value::Bool(true);
+
+    let actual = parse(src).expect("should have succeeded to parse");
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn parse_false() {
+    let src = "false";
+    let expected = Value::Bool(false);
+
+    let actual = parse(src).expect("should have succeeded to parse");
+
+    assert_eq!(actual, expected);
+}
+
+#[test]
 fn parse_empty_object() {
     let src = "{}";
     let expected = Value::Object(vec![]);
