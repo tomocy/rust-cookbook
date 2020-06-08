@@ -85,6 +85,20 @@ fn read_false() {
 }
 
 #[test]
+fn read_null() {
+    let src = "null";
+    let expected = vec![lexer::Token::Null, lexer::Token::EOF];
+
+    let mut lexer = lexer::Lexer::new(src);
+
+    for expected in expected {
+        let actual = lexer.read_token();
+
+        assert_eq!(expected, actual);
+    }
+}
+
+#[test]
 fn read_object_with_single_property() {
     let src = "{\"aiueo\": 12345}";
     let expected = vec![

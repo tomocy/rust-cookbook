@@ -61,6 +61,7 @@ impl Lexer {
         match ident {
             _ if ident == "true" => Token::Bool(true),
             _ if ident == "false" => Token::Bool(false),
+            _ if ident == "null" => Token::Null,
             _ => Token::Unknown(ident.to_string()),
         }
     }
@@ -146,5 +147,6 @@ pub enum Token {
     Number(u32),
     String(String),
     Bool(bool),
+    Null,
     Unknown(String),
 }
