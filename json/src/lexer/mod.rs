@@ -28,6 +28,7 @@ impl Lexer {
             ":" => self.compose(Token::Colon),
             "," => self.compose(Token::Comma),
             _ if self.do_have_number() => self.compose_number(),
+            _ if self.do_have_letter() => self.compose_ident(),
             _ => self.compose_unknown(),
         }
     }
@@ -53,6 +54,15 @@ impl Lexer {
     fn do_have_number(&self) -> bool {
         let curr = self.current_char();
         "0" <= curr && curr <= "9"
+    }
+
+    fn compose_ident(&mut self) -> Token {
+        let ident = self.read_string();
+        match ident {
+            _ if ident == "true" => Token::Bool(true),
+            _ if ident == "false" => Token::Bool(false),
+            _ => Token::Unknown(ident.to_string()),
+        }
     }
 
     fn compose_string(&mut self) -> Token {
@@ -135,5 +145,6 @@ pub enum Token {
     Comma,
     Number(u32),
     String(String),
+    Bool(bool),
     Unknown(String),
 }
