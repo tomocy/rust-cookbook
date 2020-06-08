@@ -27,7 +27,7 @@ impl Parser {
             lexer::Token::EOF => Err(From::from("input should not be empty")),
             lexer::Token::Number(_) => Ok(self.parse_number()),
             lexer::Token::String(_) => Ok(self.parse_string()),
-            _ => Err(From::from("unimplemented")),
+            lexer::Token::Unknown(s) => Err(From::from(format!("token '{}' is unknown", s))),
         }
     }
 

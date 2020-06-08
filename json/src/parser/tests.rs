@@ -12,6 +12,16 @@ fn parse_empty() {
 }
 
 #[test]
+fn parse_unknown() {
+    let src = "@";
+
+    let lexer = lexer::Lexer::new(src);
+    let mut parser = parser::Parser::new(lexer);
+
+    parser.parse().expect_err("token '@' is unknown");
+}
+
+#[test]
 fn parse_number() {
     let src = "12345";
     let expected = vec![parser::Value::Number(12345)];
