@@ -7,15 +7,22 @@ use std::error;
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
+pub fn parse(src: &str) -> Result<Value> {
+    let lexer = lexer::Lexer::new(src);
+    let mut parser = Parser::new(lexer);
+
+    parser.parse()
+}
+
 #[derive(Debug)]
-pub struct Parser {
+struct Parser {
     lexer: lexer::Lexer,
     curr_token: lexer::Token,
     next_token: lexer::Token,
 }
 
 impl Parser {
-    pub fn new(lexer: lexer::Lexer) -> Self {
+    fn new(lexer: lexer::Lexer) -> Self {
         let mut p = Self {
             lexer,
             curr_token: lexer::Token::Unknown("".to_string()),
@@ -28,7 +35,7 @@ impl Parser {
         p
     }
 
-    pub fn parse(&mut self) -> Result<Value> {
+    fn parse(&mut self) -> Result<Value> {
         match &self.curr_token {
             lexer::Token::EOF => Err(From::from("input should not be empty")),
             lexer::Token::LBrace => self.parse_object(),
