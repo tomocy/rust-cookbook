@@ -27,3 +27,17 @@ fn read_number() {
         assert_eq!(expected, actual);
     }
 }
+
+#[test]
+fn read_string() {
+    let src = "\"aiueo\"";
+    let expected = vec![lexer::Token::String("aiueo".to_string()), lexer::Token::EOF];
+
+    let mut lexer = lexer::Lexer::new(src);
+
+    for expected in expected {
+        let actual = lexer.read_token();
+
+        assert_eq!(expected, actual);
+    }
+}

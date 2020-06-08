@@ -18,6 +18,7 @@ impl Lexer {
     pub fn read_token(&mut self) -> Token {
         match self.current_char() {
             "\x00" => self.compose(Token::EOF),
+            "\"" => self.compose_string(),
             _ if self.do_have_number() => self.compose_number(),
             _ => self.compose(Token::Unknown),
         }
@@ -46,6 +47,36 @@ impl Lexer {
         "0" <= curr && curr <= "9"
     }
 
+    fn compose_string(&mut self) -> Token {
+        Token::String(self.read_quoted_string())
+    }
+
+    fn read_quoted_string(&mut self) -> String {
+        debug_assert_eq!(r#"""#, self.current_char());
+        self.read_char();
+
+        let s = self.read_string();
+
+        debug_assert_eq!(r#"""#, self.current_char());
+        self.read_char();
+
+        s
+    }
+
+    fn read_string(&mut self) -> String {
+        let begin = self.index;
+        while self.do_have_letter() {
+            self.read_char();
+        }
+
+        self.src[begin..self.index].to_string()
+    }
+
+    fn do_have_letter(&self) -> bool {
+        let c = self.current_char();
+        "a" <= c && c <= "z" || "A" <= c && c <= "Z"
+    }
+
     fn current_char(&self) -> &str {
         if self.index >= self.src.len() {
             "\x00"
@@ -68,4 +99,5 @@ pub enum Token {
     Unknown,
     EOF,
     Number(u32),
+    String(String),
 }
