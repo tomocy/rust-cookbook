@@ -16,9 +16,12 @@ impl Lexer {
     }
 
     pub fn read_token(&mut self) -> Token {
+        self.skip_whitespaces();
+
         match self.current_char() {
             "\x00" => self.compose(Token::EOF),
             "\"" => self.compose_string(),
+            ":" => self.compose(Token::Colon),
             _ if self.do_have_number() => self.compose_number(),
             _ => self.compose_unknown(),
         }
@@ -88,6 +91,17 @@ impl Lexer {
         c
     }
 
+    fn skip_whitespaces(&mut self) {
+        while self.do_have_whitespace() {
+            self.read_char()
+        }
+    }
+
+    fn do_have_whitespace(&self) -> bool {
+        let c = self.current_char();
+        c == " " || c == "\t" || c == "\r" || c == "\n"
+    }
+
     fn current_char(&self) -> &str {
         if self.index >= self.src.len() {
             "\x00"
@@ -108,6 +122,7 @@ impl Lexer {
 #[derive(Debug, PartialEq)]
 pub enum Token {
     EOF,
+    Colon,
     Number(u32),
     String(String),
     Unknown(String),
