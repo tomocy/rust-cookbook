@@ -23,9 +23,24 @@ impl Parser {
     }
 
     pub fn parse(&mut self) -> Result<Value, Box<dyn error::Error>> {
-        match self.token {
+        match &self.token {
             lexer::Token::EOF => Err(From::from("input should not be empty")),
+            lexer::Token::String(_) => Ok(self.parse_string()),
             _ => Err(From::from("unimplemented")),
+        }
+    }
+
+    fn parse_string(&mut self) -> Value {
+        let s = self.read_string();
+        self.read_token();
+
+        s
+    }
+
+    fn read_string(&self) -> Value {
+        match &self.token {
+            lexer::Token::String(s) => Value::String(s.clone()),
+            _ => panic!("current token should be string"),
         }
     }
 
@@ -35,4 +50,6 @@ impl Parser {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Value {}
+pub enum Value {
+    String(String),
+}
