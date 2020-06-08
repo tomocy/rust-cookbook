@@ -28,10 +28,10 @@ impl Parser {
     pub fn parse(&mut self) -> Result<Value, Box<dyn error::Error>> {
         match &self.curr_token {
             lexer::Token::EOF => Err(From::from("input should not be empty")),
-            lexer::Token::Colon => Err(From::from("not implemented")),
             lexer::Token::Number(_) => Ok(self.parse_number()),
             lexer::Token::String(_) => Ok(self.parse_string()),
             lexer::Token::Unknown(s) => Err(From::from(format!("token '{}' is unknown", s))),
+            _ => Err(From::from("not implemented")),
         }
     }
 

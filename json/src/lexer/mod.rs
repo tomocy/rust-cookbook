@@ -21,7 +21,10 @@ impl Lexer {
         match self.current_char() {
             "\x00" => self.compose(Token::EOF),
             "\"" => self.compose_string(),
+            "{" => self.compose(Token::LBrace),
+            "}" => self.compose(Token::RBrace),
             ":" => self.compose(Token::Colon),
+            "," => self.compose(Token::Comma),
             _ if self.do_have_number() => self.compose_number(),
             _ => self.compose_unknown(),
         }
@@ -122,7 +125,10 @@ impl Lexer {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
     EOF,
+    LBrace,
+    RBrace,
     Colon,
+    Comma,
     Number(u32),
     String(String),
     Unknown(String),
