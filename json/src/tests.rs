@@ -1,12 +1,12 @@
-use super::super::parser;
 use super::lexer;
+use super::*;
 
 #[test]
 fn parse_empty() {
     let src = "";
 
     let lexer = lexer::Lexer::new(src);
-    let mut parser = parser::Parser::new(lexer);
+    let mut parser = Parser::new(lexer);
 
     parser.parse().expect_err("input should not be empty");
 }
@@ -16,7 +16,7 @@ fn parse_unknown() {
     let src = "@";
 
     let lexer = lexer::Lexer::new(src);
-    let mut parser = parser::Parser::new(lexer);
+    let mut parser = Parser::new(lexer);
 
     parser.parse().expect_err("token '@' is unknown");
 }
@@ -24,10 +24,10 @@ fn parse_unknown() {
 #[test]
 fn parse_number() {
     let src = "12345";
-    let expected = vec![parser::Value::Number(12345)];
+    let expected = vec![Value::Number(12345)];
 
     let lexer = lexer::Lexer::new(src);
-    let mut parser = parser::Parser::new(lexer);
+    let mut parser = Parser::new(lexer);
 
     for expected in expected {
         let actual = parser.parse().expect("should have succeeded to parse");
@@ -39,10 +39,10 @@ fn parse_number() {
 #[test]
 fn parse_string() {
     let src = "\"aiueo\"";
-    let expected = vec![parser::Value::String("aiueo".to_string())];
+    let expected = vec![Value::String("aiueo".to_string())];
 
     let lexer = lexer::Lexer::new(src);
-    let mut parser = parser::Parser::new(lexer);
+    let mut parser = Parser::new(lexer);
 
     for expected in expected {
         let actual = parser.parse().expect("should have succeeded to parse");
@@ -54,10 +54,10 @@ fn parse_string() {
 #[test]
 fn parse_empty_object() {
     let src = "{}";
-    let expected = vec![parser::Value::Object(vec![])];
+    let expected = vec![Value::Object(vec![])];
 
     let lexer = lexer::Lexer::new(src);
-    let mut parser = parser::Parser::new(lexer);
+    let mut parser = Parser::new(lexer);
 
     for expected in expected {
         let actual = parser.parse().expect("should have succeeded to parse");
@@ -69,13 +69,13 @@ fn parse_empty_object() {
 #[test]
 fn parse_object_with_single_property() {
     let src = r#"{"aiueo": 12345}"#;
-    let expected = vec![parser::Value::Object(vec![parser::Property::new(
+    let expected = vec![Value::Object(vec![Property::new(
         "aiueo",
-        parser::Value::Number(12345),
+        Value::Number(12345),
     )])];
 
     let lexer = lexer::Lexer::new(src);
-    let mut parser = parser::Parser::new(lexer);
+    let mut parser = Parser::new(lexer);
 
     for expected in expected {
         let actual = parser.parse().expect("should have succeeded to parse");
@@ -91,14 +91,14 @@ fn parse_object_with_multiple_properties() {
     "bbb": 222,
     "ccc": 333
 }"#;
-    let expected = vec![parser::Value::Object(vec![
-        parser::Property::new("aaa", parser::Value::Number(111)),
-        parser::Property::new("bbb", parser::Value::Number(222)),
-        parser::Property::new("ccc", parser::Value::Number(333)),
+    let expected = vec![Value::Object(vec![
+        Property::new("aaa", Value::Number(111)),
+        Property::new("bbb", Value::Number(222)),
+        Property::new("ccc", Value::Number(333)),
     ])];
 
     let lexer = lexer::Lexer::new(src);
-    let mut parser = parser::Parser::new(lexer);
+    let mut parser = Parser::new(lexer);
 
     for expected in expected {
         let actual = parser.parse().expect("should have succeeded to parse");
