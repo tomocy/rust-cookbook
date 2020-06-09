@@ -64,6 +64,8 @@ impl Universe {
     }
 
     pub fn tick(&mut self) {
+        let _timer = Timer::new("Universe::tick");
+
         let mut next = self.cells.clone();
 
         for row in 0..self.height {
@@ -179,5 +181,22 @@ impl Cell {
             Cell::Dead => Cell::Alive,
             Cell::Alive => Cell::Dead,
         }
+    }
+}
+
+struct Timer<'a> {
+    name: &'a str,
+}
+
+impl<'a> Timer<'a> {
+    fn new(name: &'a str) -> Self {
+        web_sys::console::time_with_label(name);
+        Self { name }
+    }
+}
+
+impl<'a> Drop for Timer<'a> {
+    fn drop(&mut self) {
+        web_sys::console::time_end_with_label(self.name);
     }
 }
