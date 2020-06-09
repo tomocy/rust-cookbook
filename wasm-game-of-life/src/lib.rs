@@ -121,6 +121,12 @@ impl Universe {
         count
     }
 
+    pub fn make_all_dead(&mut self) {
+        for cell in &mut self.cells {
+            *cell = Cell::Dead;
+        }
+    }
+
     pub fn toggle_cell(&mut self, row: u32, col: u32) {
         let i = self.get_index(row, col);
         self.cells[i].toggle();
@@ -132,12 +138,6 @@ impl Universe {
 }
 
 impl Universe {
-    pub fn make_all_dead(&mut self) {
-        for cell in &mut self.cells {
-            *cell = Cell::Dead;
-        }
-    }
-
     pub fn cells_as_slice(&self) -> &[Cell] {
         &self.cells
     }
