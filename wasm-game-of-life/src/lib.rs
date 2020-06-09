@@ -1,9 +1,16 @@
 mod utils;
 
 extern crate js_sys;
+extern crate web_sys;
 
 use std::fmt;
 use wasm_bindgen::prelude::*;
+
+// macro_rules! log {
+//     ($($t:tt)*) => {
+//         web_sys::console::log_1(&format!($($t)*).into());
+//     };
+// }
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -21,6 +28,8 @@ pub struct Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new(height: u32, width: u32) -> Self {
+        utils::set_panic_hook();
+
         let cells = (0..width * height)
             .map(|_| {
                 if js_sys::Math::random() < 0.5 {
@@ -63,6 +72,14 @@ impl Universe {
                 let cell = self.cells[i];
                 let live_neighbors = self.live_neighbor_count(row, col);
 
+                // log!(
+                //     "cell[{}, {}] is initially {:?} and has {} live neighbors",
+                //     row,
+                //     col,
+                //     cell,
+                //     live_neighbors
+                // );
+
                 let next_cell = match (cell, live_neighbors) {
                     (Cell::Alive, x) if x < 2 => Cell::Dead,
                     (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
@@ -70,6 +87,12 @@ impl Universe {
                     (Cell::Dead, 3) => Cell::Alive,
                     (otherwise, _) => otherwise,
                 };
+
+                // if next_cell == cell {
+                //     log!("    it is still {:?}", next_cell);
+                // } else {
+                //     log!("    it becomes {:?}", next_cell);
+                // }
 
                 next[i] = next_cell;
             }
