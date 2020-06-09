@@ -121,6 +121,11 @@ impl Universe {
         count
     }
 
+    pub fn toggle_cell(&mut self, row: u32, col: u32) {
+        let i = self.get_index(row, col);
+        self.cells[i].toggle();
+    }
+
     fn get_index(&self, row: u32, col: u32) -> usize {
         ((row * self.width) + col) as usize
     }
@@ -166,4 +171,13 @@ impl fmt::Display for Universe {
 pub enum Cell {
     Dead = 0,
     Alive = 1,
+}
+
+impl Cell {
+    fn toggle(&mut self) {
+        *self = match *self {
+            Cell::Dead => Cell::Alive,
+            Cell::Alive => Cell::Dead,
+        }
+    }
 }
