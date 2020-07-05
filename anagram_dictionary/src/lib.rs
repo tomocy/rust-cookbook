@@ -1,10 +1,25 @@
 use std::collections::HashMap;
-use std::env;
 use std::error;
 use std::fs::File;
 use std::io;
 use std::io::BufRead;
 use std::path::Path;
+
+pub fn run<T: Iterator<Item = String>>(args: T) -> Result<(), Box<dyn error::Error>> {
+    let config = Config::new(args)?;
+    let dic = Dictionary::from_file(config.fname)?;
+
+    match dic.find_anagrams(&config.word) {
+        Some(anagrams) => {
+            for anagram in anagrams {
+                println!("{}", anagram);
+            }
+        }
+        None => println!("no anagrams found for {}", config.word),
+    }
+
+    Ok(())
+}
 
 struct Config {
     fname: String,
