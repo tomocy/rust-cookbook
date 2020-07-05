@@ -48,12 +48,16 @@ struct Dictionary(HashMap<String, Vec<String>>);
 
 impl Dictionary {
     fn from_file<T: AsRef<Path>>(fname: T) -> Result<Self, io::Error> {
+        let file = File::open(fname)?;
+        Self::from_reader(file)
+    }
+
+    fn from_reader<T: io::Read>(reader: T) -> Result<Self, io::Error> {
         let mut dict = Self::new();
 
-        let file = File::open(fname)?;
-        let file = io::BufReader::new(file);
+        let reader = io::BufReader::new(reader);
 
-        for line in file.lines() {
+        for line in reader.lines() {
             let word = line?;
             dict.add_word(word);
         }
@@ -114,6 +118,32 @@ mod tests {
             false,
             Config::new(["/program", "fname.txt"].iter().map(|arg| arg.to_string())).is_ok()
         );
+    }
+
+    #[test]
+    fn new_dictionary_from_reader() {
+        let mut expected = Dictionary::new();
+        expected.0.insert(
+            "aet".to_string(),
+            vec![
+                "ate".to_string(),
+                "eat".to_string(),
+                "eta".to_string(),
+                "tea".to_string(),
+            ],
+        );
+        expected
+            .0
+            .insert("dorw".to_string(), vec!["word".to_string()]);
+
+        let lines: Vec<_> = vec!["ate", "eat", "eta", "tea", "word"]
+            .iter()
+            .map(|word| word.to_string())
+            .collect();
+        let reader = lines.join("\n");
+        let actual = Dictionary::from_reader(reader.as_bytes()).unwrap();
+
+        assert_eq!(expected, actual);
     }
 
     #[test]
