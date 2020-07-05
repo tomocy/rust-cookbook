@@ -1,9 +1,27 @@
 use std::collections::HashMap;
+use std::fs::File;
+use std::io;
+use std::io::BufRead;
+use std::path::Path;
 
 #[derive(Debug, PartialEq)]
 struct Dictionary(HashMap<String, Vec<String>>);
 
 impl Dictionary {
+    fn from_file<T: AsRef<Path>>(fname: T) -> Result<Self, io::Error> {
+        let mut dict = Self::new();
+
+        let file = File::open(fname)?;
+        let file = io::BufReader::new(file);
+
+        for line in file.lines() {
+            let word = line?;
+            dict.add_word(word);
+        }
+
+        Ok(dict)
+    }
+
     fn new() -> Self {
         Self(HashMap::new())
     }
