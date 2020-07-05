@@ -12,6 +12,11 @@ impl Dictionary {
         let sorted = sort_chars(&word);
         self.0.entry(sorted).or_insert(Vec::new()).push(word);
     }
+
+    fn find_anagrams(&self, word: &str) -> Option<&Vec<String>> {
+        let sorted = sort_chars(word);
+        self.0.get(&sorted)
+    }
 }
 
 fn sort_chars(s: &str) -> String {
@@ -48,6 +53,43 @@ mod tests {
         actual.add_word("eta".to_string());
         actual.add_word("tea".to_string());
         actual.add_word("word".to_string());
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn dictionary_find_anagrams() {
+        let expected = vec![
+            "ate".to_string(),
+            "eat".to_string(),
+            "eta".to_string(),
+            "tea".to_string(),
+        ];
+
+        let mut dict = Dictionary::new();
+        dict.add_word("ate".to_string());
+        dict.add_word("eat".to_string());
+        dict.add_word("eta".to_string());
+        dict.add_word("tea".to_string());
+        dict.add_word("word".to_string());
+
+        let actual = dict.find_anagrams("eat").unwrap();
+
+        assert_eq!(expected, *actual);
+    }
+
+    #[test]
+    fn dictionary_find_no_anagrams() {
+        let expected = None;
+
+        let mut dict = Dictionary::new();
+        dict.add_word("ate".to_string());
+        dict.add_word("eat".to_string());
+        dict.add_word("eta".to_string());
+        dict.add_word("tea".to_string());
+        dict.add_word("word".to_string());
+
+        let actual = dict.find_anagrams("aaa");
 
         assert_eq!(expected, actual);
     }
