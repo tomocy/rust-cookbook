@@ -1,8 +1,32 @@
 use std::collections::HashMap;
+use std::env;
+use std::error;
 use std::fs::File;
 use std::io;
 use std::io::BufRead;
 use std::path::Path;
+
+struct Config {
+    fname: String,
+    word: String,
+}
+
+impl Config {
+    fn new<T: Iterator<Item = String>>(mut args: T) -> Result<Self, Box<dyn error::Error>> {
+        args.next();
+
+        let fname = match args.next() {
+            Some(fname) => fname,
+            None => return Err(From::from("filename is unspecified")),
+        };
+        let word = match args.next() {
+            Some(word) => word,
+            None => return Err(From::from("word is not unspecified")),
+        };
+
+        Ok(Self { fname, word })
+    }
+}
 
 #[derive(Debug, PartialEq)]
 struct Dictionary(HashMap<String, Vec<String>>);
@@ -47,6 +71,35 @@ fn sort_chars(s: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn new_config() {
+        assert_eq!(
+            true,
+            Config::new(
+                ["/program", "fname.txt", "word"]
+                    .iter()
+                    .map(|arg| arg.to_string())
+            )
+            .is_ok()
+        );
+    }
+
+    #[test]
+    fn config_without_fname() {
+        assert_eq!(
+            false,
+            Config::new(["/program"].iter().map(|arg| arg.to_string())).is_ok()
+        );
+    }
+
+    #[test]
+    fn config_without_word() {
+        assert_eq!(
+            false,
+            Config::new(["/program", "fname.txt"].iter().map(|arg| arg.to_string())).is_ok()
+        );
+    }
 
     #[test]
     fn dictionary_add_word() {
