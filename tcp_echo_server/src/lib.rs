@@ -8,6 +8,10 @@ pub fn run() -> Result<(), Box<dyn error::Error>> {
     server.listen_and_serve()
 }
 
+struct Config {
+    address: String,
+}
+
 struct Server {
     address: String,
 }
