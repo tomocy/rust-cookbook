@@ -3,8 +3,9 @@ use std::io::{Read, Write};
 use std::net;
 use std::thread;
 
-pub fn run() -> Result<(), Box<dyn error::Error>> {
-    let server = Server::new("localhost:8080".to_string());
+pub fn run<T: Iterator<Item = String>>(args: T) -> Result<(), Box<dyn error::Error>> {
+    let config = Config::new(args)?;
+    let server = Server::new(config.address);
     server.listen_and_serve()
 }
 
