@@ -8,8 +8,20 @@ pub fn run() -> Result<(), Box<dyn error::Error>> {
     server.listen_and_serve()
 }
 
+#[derive(Debug, PartialEq)]
 struct Config {
     address: String,
+}
+
+impl Config {
+    fn new<T: Iterator<Item = String>>(mut args: T) -> Result<Self, Box<dyn error::Error>> {
+        let address = match args.next() {
+            Some(address) => address,
+            None => return Err(From::from("address is not specified")),
+        };
+
+        Ok(Self { address })
+    }
 }
 
 struct Server {
@@ -78,5 +90,28 @@ impl Server {
 
     fn log(level: &str, msg: &str) {
         println!("[{}] {}", level, msg);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn new_config() {
+        let expected = Config {
+            address: "127.0.0.1:8080".to_string(),
+        };
+
+        let actual = Config::new(vec!["127.0.0.1:8080"].iter().map(|s| s.to_string())).unwrap();
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    #[should_panic]
+    fn new_config_without_address() {
+        let args: Vec<String> = Vec::new();
+        Config::new(args.into_iter()).unwrap();
     }
 }
