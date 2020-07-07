@@ -59,6 +59,9 @@ impl Server {
             loop {
                 let mut req = [0; Self::BUF_SIZE];
                 let n = stream.read(&mut req)?;
+                if n == 0 {
+                    return Ok(());
+                }
                 req[0..n].iter().for_each(|&b| read_req.push(b));
 
                 match HTTP0_9Parser.parse(&read_req) {
