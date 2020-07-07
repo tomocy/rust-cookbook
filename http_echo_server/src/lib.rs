@@ -4,6 +4,8 @@ pub fn run() -> Result<(), Box<dyn error::Error>> {
     Err(From::from("not implemented"))
 }
 
+struct HTTP0_9Parser;
+
 enum ParseResult<'a, E> {
     Ok(Request<'a>),
     Continuing,
@@ -20,3 +22,8 @@ impl<'a, E> From<Result<Request<'a>, E>> for ParseResult<'a, E> {
 }
 
 struct Request<'a>(&'a str);
+
+##[cfg(test)]
+mod tests {
+    use super::*;
+}
