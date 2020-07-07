@@ -7,12 +7,14 @@ pub fn run() -> Result<(), Box<dyn error::Error>> {
     Err(From::from("not implemented"))
 }
 
+trait RequestParser {
+    fn parse<'req>(&self, req: &'req [u8]) -> ParseResult<Request<'req>, Box<dyn error::Error>>;
+}
+
 struct HTTP0_9Parser;
 
-impl HTTP0_9Parser {
-    const CRLF: &'static [u8] = b"\r\n";
-
-    fn parse(req: &[u8]) -> ParseResult<Request, Box<dyn error::Error>> {
+impl RequestParser for HTTP0_9Parser {
+    fn parse<'req>(&self, req: &'req [u8]) -> ParseResult<Request<'req>, Box<dyn error::Error>> {
         if !Self::ends_with_crlf(req) {
             return ParseResult::Continuing;
         }
@@ -26,6 +28,10 @@ impl HTTP0_9Parser {
 
         str::from_utf8(req).map(Request).into()
     }
+}
+
+impl HTTP0_9Parser {
+    const CRLF: &'static [u8] = b"\r\n";
 
     fn parse_method(buf: &[u8]) -> &[u8] {
         buf.split(|&b| b == b' ').next().unwrap()
@@ -77,7 +83,7 @@ mod tests {
     #[test]
     fn http0_9parser_succeed_to_parse() {
         let req = "GET /a/b\r\n".as_bytes();
-        let res = HTTP0_9Parser::parse(req);
+        let res = HTTP0_9Parser.parse(req);
 
         match res {
             ParseResult::Ok(_) => assert!(true),
@@ -88,7 +94,7 @@ mod tests {
     #[test]
     fn http0_9parser_continue_parsing() {
         let req = "GET /\r".as_bytes();
-        let res = HTTP0_9Parser::parse(req);
+        let res = HTTP0_9Parser.parse(req);
 
         match res {
             ParseResult::Continuing => assert!(true),
@@ -99,7 +105,7 @@ mod tests {
     #[test]
     fn http0_9parser_failed_to_parse() {
         let req = "POST /\r\n".as_bytes();
-        let res = HTTP0_9Parser::parse(req);
+        let res = HTTP0_9Parser.parse(req);
 
         match res {
             ParseResult::Err(_) => assert!(true),
