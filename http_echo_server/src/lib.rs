@@ -8,6 +8,19 @@ pub fn run() -> Result<(), Box<dyn error::Error>> {
     Err(From::from("not implemented"))
 }
 
+struct Config {
+    address: String,
+}
+
+impl Config {
+    fn new<T: Iterator<Item = String>>(mut args: T) -> Result<Self, Box<dyn error::Error>> {
+        match args.next() {
+            Some(address) => Ok(Self { address }),
+            None => Err("address is not specified".into()),
+        }
+    }
+}
+
 struct Server {
     address: String,
 }
