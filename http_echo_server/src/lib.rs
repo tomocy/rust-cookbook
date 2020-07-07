@@ -1,5 +1,8 @@
 use std::error;
+use std::io::{Read, Write};
+use std::net;
 use std::str;
+use std::thread;
 
 pub fn run() -> Result<(), Box<dyn error::Error>> {
     Err(From::from("not implemented"))
@@ -10,8 +13,61 @@ struct Server {
 }
 
 impl Server {
+    const BUF_SIZE: usize = 1024;
+
     fn new(address: String) -> Self {
         Self { address }
+    }
+
+    fn listen_and_serve(&self) -> Result<(), Box<dyn error::Error>> {
+        let listener = net::TcpListener::bind(&self.address)?;
+
+        Self::log_info(&format!("listen on {}", self.address));
+
+        for stream in listener.incoming() {
+            let stream = stream?;
+            let work = Self::spawn_worker();
+
+            thread::spawn(move || {
+                if let Err(err) = work(stream) {
+                    Self::log_error(&format!("failed to serve: {}", err));
+                }
+            });
+        }
+
+        Ok(())
+    }
+
+    fn spawn_worker() -> Box<dyn Fn(net::TcpStream) -> Result<(), Box<dyn error::Error>> + Send> {
+        Box::new(|mut stream| {
+            let mut read_req = Vec::new();
+            loop {
+                let mut req = [0; Self::BUF_SIZE];
+                let n = stream.read(&mut req)?;
+                req[0..n].iter().for_each(|&b| read_req.push(b));
+
+                match HTTP0_9Parser.parse(&read_req) {
+                    ParseResult::Ok(req) => {
+                        stream.write(req.into())?;
+                        return Ok(());
+                    }
+                    ParseResult::Continuing => continue,
+                    ParseResult::Err(err) => return Err(err),
+                }
+            }
+        })
+    }
+
+    fn log_info(msg: &str) {
+        Self::log("INFO", msg);
+    }
+
+    fn log_error(msg: &str) {
+        Self::log("ERROR", msg);
+    }
+
+    fn log(level: &str, msg: &str) {
+        println!("[{}] {}", level, msg);
     }
 }
 
@@ -83,6 +139,12 @@ where
 
 #[derive(Debug, PartialEq)]
 struct Request<'a>(&'a str);
+
+impl<'a> From<Request<'a>> for &'a [u8] {
+    fn from(req: Request<'a>) -> Self {
+        req.0.as_bytes()
+    }
+}
 
 #[cfg(test)]
 mod tests {
