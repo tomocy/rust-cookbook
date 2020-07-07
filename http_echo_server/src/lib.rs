@@ -4,8 +4,10 @@ use std::net;
 use std::str;
 use std::thread;
 
-pub fn run() -> Result<(), Box<dyn error::Error>> {
-    Err(From::from("not implemented"))
+pub fn run<T: Iterator<Item = String>>(args: T) -> Result<(), Box<dyn error::Error>> {
+    let config = Config::new(args)?;
+    let server = Server::new(config.address);
+    server.listen_and_serve()
 }
 
 struct Config {
