@@ -1,5 +1,7 @@
 use std::error;
+use std::fmt;
 use std::str;
+use std::str::Utf8Error;
 
 pub fn run() -> Result<(), Box<dyn error::Error>> {
     Err(From::from("not implemented"))
@@ -22,7 +24,7 @@ impl HTTP0_9Parser {
 
         let req = Self::trim_trailing_crlf(req);
 
-        str::from_utf8(req).map(Request).map_err(From::from).into()
+        str::from_utf8(req).map(Request).into()
     }
 
     fn parse_method(buf: &[u8]) -> &[u8] {
@@ -53,26 +55,15 @@ enum ParseResult<T, E> {
     Err(E),
 }
 
-impl<T, E> From<Result<T, E>> for ParseResult<T, E> {
+impl<T, E> From<Result<T, E>> for ParseResult<T, Box<dyn error::Error>>
+where
+    E: Into<Box<dyn error::Error>>,
+{
     fn from(result: Result<T, E>) -> Self {
         match result {
             Ok(ok) => ParseResult::Ok(ok),
-            Err(err) => ParseResult::Err(err),
+            Err(err) => ParseResult::Err(err.into()),
         }
-    }
-}
-
-struct Error;
-
-impl From<Error> for Box<dyn error::Error> {
-    fn from(err: Error) -> Self {
-        From::from("")
-    }
-}
-
-impl From<str::Utf8Error> for Error {
-    fn from(err: str::Utf8Error) -> Self {
-        Error
     }
 }
 
