@@ -6,6 +6,7 @@ pub fn run<T: Iterator<Item = String>>(_: T) -> Result<(), Box<dyn error::Error>
 
 enum Token {
     Illegal(String),
+    EOF,
 }
 
 #[cfg(test)]
