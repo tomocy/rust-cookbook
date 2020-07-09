@@ -15,6 +15,7 @@ impl Lexer {
     }
 }
 
+#[derive(Debug)]
 enum Token {
     Illegal(String),
     EOF,
