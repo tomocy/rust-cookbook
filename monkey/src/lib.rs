@@ -56,6 +56,7 @@ enum Expression {
         operator: InfixOperator,
         right: Box<Expression>,
     },
+    Int(i32),
 }
 
 #[derive(Debug, PartialEq)]
