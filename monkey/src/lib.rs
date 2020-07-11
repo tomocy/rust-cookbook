@@ -7,16 +7,23 @@ pub fn run<T: Iterator<Item = String>>(_: T) -> Result<(), Box<dyn error::Error>
 struct Lexer<'src> {
     src: &'src str,
     pos: usize,
+    reading_pos: usize,
 }
 
 impl<'src> Lexer<'src> {
     const EOF: u8 = 0;
 
     fn new(src: &'src str) -> Self {
-        Self { src, pos: 0 }
+        Self {
+            src,
+            pos: 0,
+            reading_pos: 0,
+        }
     }
 
-    fn read_token(&self) -> Token {
+    fn read_token(&mut self) -> Token {
+        self.read_char();
+
         let ch = self.char();
         match ch {
             Self::EOF => Token::EOF,
@@ -29,7 +36,8 @@ impl<'src> Lexer<'src> {
             return;
         }
 
-        self.pos += 1;
+        self.pos = self.reading_pos;
+        self.reading_pos += 1;
     }
 
     fn char(&self) -> u8 {
@@ -54,7 +62,7 @@ mod tests {
     #[test]
     fn lexer_reads_empty() {
         let src = "";
-        let lexer = Lexer::new(src);
+        let mut lexer = Lexer::new(src);
 
         let expected = vec![Token::EOF];
 
