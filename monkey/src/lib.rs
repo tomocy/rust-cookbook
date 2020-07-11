@@ -243,6 +243,7 @@ impl<'src> Lexer<'src> {
 enum Token {
     Illegal(String),
     EOF,
+    Semicolon,
     Plus,
     Int(i32),
     String(String),
