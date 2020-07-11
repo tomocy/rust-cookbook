@@ -14,7 +14,9 @@ impl<'src> Parser<'src> {
     }
 }
 
-enum Statement {}
+enum Statement {
+    Expression(Expression),
+}
 
 enum Expression {
     Infix {
