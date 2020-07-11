@@ -5,13 +5,13 @@ pub fn run<T: Iterator<Item = String>>(_: T) -> Result<(), Box<dyn error::Error>
     Err("not implemented".into())
 }
 
-struct Lexer {
-    src_reader: Box<dyn io::Read>,
+struct Lexer<'src> {
+    src: &'src str,
 }
 
-impl Lexer {
-    fn new(src_reader: Box<dyn io::Read>) -> Self {
-        Self { src_reader }
+impl<'src> Lexer<'src> {
+    fn new(src: &'src str) -> Self {
+        Self { src }
     }
 }
 
