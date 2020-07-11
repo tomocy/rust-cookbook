@@ -18,8 +18,8 @@ impl<'src> Parser<'src> {
             reading_tok: Token::EOF,
         };
 
-        parser.read_token();
-        parser.read_token();
+        parser.read();
+        parser.read();
 
         parser
     }
@@ -36,9 +36,9 @@ impl<'src> Parser<'src> {
         self.tok == tok
     }
 
-    fn read_token(&mut self) {
+    fn read(&mut self) {
         self.tok = self.reading_tok.clone();
-        self.reading_tok = self.lexer.read_token();
+        self.reading_tok = self.lexer.read();
     }
 }
 
@@ -80,7 +80,7 @@ impl<'src> Lexer<'src> {
         }
     }
 
-    fn read_token(&mut self) -> Token {
+    fn read(&mut self) -> Token {
         self.read_char();
 
         let ch = self.char();
@@ -182,7 +182,7 @@ mod tests {
         let expected = vec![Token::EOF];
 
         for expected in expected.into_iter() {
-            let actual = lexer.read_token();
+            let actual = lexer.read();
             assert_eq!(expected, actual);
         }
     }
@@ -195,7 +195,7 @@ mod tests {
         let expected = vec![Token::Plus, Token::EOF];
 
         for expected in expected.into_iter() {
-            let actual = lexer.read_token();
+            let actual = lexer.read();
             assert_eq!(expected, actual);
         }
     }
@@ -208,7 +208,7 @@ mod tests {
         let expected = vec![Token::Int(12345), Token::EOF];
 
         for expected in expected.into_iter() {
-            let actual = lexer.read_token();
+            let actual = lexer.read();
             assert_eq!(expected, actual);
         }
     }
@@ -221,7 +221,7 @@ mod tests {
         let expected = vec![Token::String("string".into()), Token::EOF];
 
         for expected in expected.into_iter() {
-            let actual = lexer.read_token();
+            let actual = lexer.read();
             assert_eq!(expected, actual);
         }
     }
