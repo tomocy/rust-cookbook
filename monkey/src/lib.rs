@@ -44,10 +44,38 @@ impl<'src> Parser<'src> {
     }
 
     fn parse_expression(&self) -> Result<Expression, Box<dyn error::Error>> {
+        self.parse_prefix_expression()
+    }
+
+    fn parse_prefix_expression(&self) -> Result<Expression, Box<dyn error::Error>> {
         let tok = self.tok.clone();
         match tok {
             Token::Int(x) => Ok(Expression::Int(x)),
             Token::String(x) => Ok(Expression::String(x)),
+            _ => Err("invalid token".into()),
+        }
+    }
+
+    fn parse_infix_expression(
+        &mut self,
+        left: Expression,
+    ) -> Result<Expression, Box<dyn error::Error>> {
+        let operator = self.parse_infix_operator()?;
+        let right = self.parse_expression()?;
+
+        Ok(Expression::Infix {
+            left: Box::new(left),
+            operator,
+            right: Box::new(right),
+        })
+    }
+
+    fn parse_infix_operator(&mut self) -> Result<InfixOperator, Box<dyn error::Error>> {
+        match self.tok {
+            Token::Plus => {
+                self.read();
+                Ok(InfixOperator::Plus)
+            }
             _ => Err("invalid token".into()),
         }
     }
