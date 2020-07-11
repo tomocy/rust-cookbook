@@ -27,31 +27,50 @@ impl<'src> Parser<'src> {
     fn parse(&mut self) -> Result<Program, Box<dyn error::Error>> {
         let mut program = Vec::new();
 
-        while !self.have_tokenen(Token::EOF) {
+        while !self.have_token(Token::EOF) {
             program.push(self.parse_statement()?);
-            self.read();
         }
 
         Ok(program)
     }
 
-    fn parse_statement(&self) -> Result<Statement, Box<dyn error::Error>> {
-        self.parse_expression_statement()
+    fn parse_statement(&mut self) -> Result<Statement, Box<dyn error::Error>> {
+        let stat = self.parse_expression_statement()?;
+        self.read();
+
+        Ok(stat)
     }
 
-    fn parse_expression_statement(&self) -> Result<Statement, Box<dyn error::Error>> {
-        Ok(Statement::Expression(self.parse_expression()?))
+    fn parse_expression_statement(&mut self) -> Result<Statement, Box<dyn error::Error>> {
+        Ok(Statement::Expression(
+            self.parse_expression(InfixOperatorPrecedence::Lowest)?,
+        ))
     }
 
-    fn parse_expression(&self) -> Result<Expression, Box<dyn error::Error>> {
-        self.parse_prefix_expression()
+    fn parse_expression<P: Into<InfixOperatorPrecedence>>(
+        &mut self,
+        prec: P,
+    ) -> Result<Expression, Box<dyn error::Error>> {
+        let prec = prec.into();
+        let mut exp = self.parse_prefix_expression()?;
+        while prec < self.curr_token.clone().into() {
+            exp = self.parse_infix_expression(exp)?;
+        }
+
+        Ok(exp)
     }
 
-    fn parse_prefix_expression(&self) -> Result<Expression, Box<dyn error::Error>> {
+    fn parse_prefix_expression(&mut self) -> Result<Expression, Box<dyn error::Error>> {
         let curr_token = self.curr_token.clone();
         match curr_token {
-            Token::Int(x) => Ok(Expression::Int(x)),
-            Token::String(x) => Ok(Expression::String(x)),
+            Token::Int(x) => {
+                self.read();
+                Ok(Expression::Int(x))
+            }
+            Token::String(x) => {
+                self.read();
+                Ok(Expression::String(x))
+            }
             _ => Err("invalid tokenen".into()),
         }
     }
@@ -61,7 +80,7 @@ impl<'src> Parser<'src> {
         left: Expression,
     ) -> Result<Expression, Box<dyn error::Error>> {
         let operator = self.parse_infix_operator()?;
-        let right = self.parse_expression()?;
+        let right = self.parse_expression(operator)?;
 
         Ok(Expression::Infix {
             left: Box::new(left),
@@ -80,7 +99,7 @@ impl<'src> Parser<'src> {
         }
     }
 
-    fn have_tokenen(&self, curr_token: Token) -> bool {
+    fn have_token(&self, curr_token: Token) -> bool {
         self.curr_token == curr_token
     }
 
@@ -108,7 +127,7 @@ enum Expression {
     String(String),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 enum InfixOperator {
     Plus,
 }
@@ -122,6 +141,7 @@ impl From<InfixOperator> for InfixOperatorPrecedence {
     }
 }
 
+#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 enum InfixOperatorPrecedence {
     Lowest,
     Additive,
@@ -247,6 +267,22 @@ impl From<Token> for InfixOperatorPrecedence {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parser_parses() {
+        let src = r#"1 + 2"#;
+        let lexer = Lexer::new(src);
+        let mut parser = Parser::new(lexer);
+
+        let expected: Program = vec![Statement::Expression(Expression::Infix {
+            left: Box::new(Expression::Int(1)),
+            operator: InfixOperator::Plus,
+            right: Box::new(Expression::Int(2)),
+        })];
+        let actual = parser.parse().unwrap();
+
+        assert_eq!(expected, actual);
+    }
 
     #[test]
     fn parser_parses_empty() {
