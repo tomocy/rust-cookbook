@@ -138,6 +138,8 @@ impl<'src> Lexer<'src> {
     fn read(&mut self) -> Token {
         self.read_char();
 
+        self.skip_whitespaces();
+
         let ch = self.char();
         match ch {
             Self::EOF => Token::EOF,
@@ -145,6 +147,12 @@ impl<'src> Lexer<'src> {
             b'"' => Token::String(self.read_string()),
             _ if self.have_digit() => Token::Int(self.read_number()),
             _ => Token::Illegal(String::from_utf8(vec![ch]).unwrap()),
+        }
+    }
+
+    fn skip_whitespaces(&mut self) {
+        while self.have_whitespace() {
+            self.read_char();
         }
     }
 
@@ -183,6 +191,11 @@ impl<'src> Lexer<'src> {
 
         self.pos = self.reading_pos;
         self.reading_pos += 1;
+    }
+
+    fn have_whitespace(&self) -> bool {
+        let ch = self.char();
+        ch == b' ' || ch == b'\t' || ch == b'\r' || ch == b'\n'
     }
 
     fn have_letter(&self) -> bool {
@@ -251,6 +264,19 @@ mod tests {
         let actual = parser.parse().unwrap();
 
         assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn lexer_reads() {
+        let src = r#"1 + 2"#;
+        let mut lexer = Lexer::new(src);
+
+        let expected = vec![Token::Int(1), Token::Plus, Token::Int(2), Token::EOF];
+
+        for expected in expected.into_iter() {
+            let actual = lexer.read();
+            assert_eq!(expected, actual);
+        }
     }
 
     #[test]
