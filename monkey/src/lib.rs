@@ -235,6 +235,15 @@ enum Token {
     String(String),
 }
 
+impl From<Token> for InfixOperatorPrecedence {
+    fn from(token: Token) -> Self {
+        match token {
+            Token::Plus => Self::Additive,
+            _ => Self::Lowest,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
