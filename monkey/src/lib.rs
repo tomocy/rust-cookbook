@@ -14,10 +14,14 @@ impl<'src> Parser<'src> {
     }
 }
 
+type Program = Vec<Statement>;
+
+#[derive(Debug, PartialEq)]
 enum Statement {
     Expression(Expression),
 }
 
+#[derive(Debug, PartialEq)]
 enum Expression {
     Infix {
         left: Box<Expression>,
@@ -26,6 +30,7 @@ enum Expression {
     },
 }
 
+#[derive(Debug, PartialEq)]
 enum InfixOperator {
     Plus,
 }
