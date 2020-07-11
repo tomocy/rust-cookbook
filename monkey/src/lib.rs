@@ -27,9 +27,28 @@ impl<'src> Lexer<'src> {
         let ch = self.char();
         match ch {
             Self::EOF => Token::EOF,
+            b'"' => Token::String(self.read_string()),
             _ if self.have_digit() => Token::Int(self.read_number()),
             _ => Token::Illegal(String::from_utf8(vec![ch]).unwrap()),
         }
+    }
+
+    fn read_string(&mut self) -> String {
+        debug_assert_eq!(b'"', self.char());
+        self.read_char();
+
+        let begin = self.pos;
+
+        while self.have_letter() {
+            self.read_char();
+        }
+
+        let end = self.pos;
+
+        debug_assert_eq!(b'"', self.char());
+        self.read_char();
+
+        self.src[begin..end].into()
     }
 
     fn read_number(&mut self) -> i32 {
@@ -51,6 +70,11 @@ impl<'src> Lexer<'src> {
         self.reading_pos += 1;
     }
 
+    fn have_letter(&self) -> bool {
+        let ch = self.char();
+        b'a' <= ch && ch <= b'z' || b'A' <= ch && ch <= b'Z'
+    }
+
     fn have_digit(&self) -> bool {
         let ch = self.char();
         b'0' <= ch && ch <= b'9'
@@ -70,6 +94,7 @@ enum Token {
     Illegal(String),
     EOF,
     Int(i32),
+    String(String),
 }
 
 #[cfg(test)]
@@ -95,6 +120,19 @@ mod tests {
         let mut lexer = Lexer::new(src);
 
         let expected = vec![Token::Int(12345), Token::EOF];
+
+        for expected in expected.into_iter() {
+            let actual = lexer.read_token();
+            assert_eq!(expected, actual);
+        }
+    }
+
+    #[test]
+    fn lexer_reads_string() {
+        let src = r#""string""#;
+        let mut lexer = Lexer::new(src);
+
+        let expected = vec![Token::String("string".into()), Token::EOF];
 
         for expected in expected.into_iter() {
             let actual = lexer.read_token();
