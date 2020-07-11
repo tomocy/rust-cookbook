@@ -6,11 +6,39 @@ pub fn run<T: Iterator<Item = String>>(_: T) -> Result<(), Box<dyn error::Error>
 
 struct Parser<'src> {
     lexer: Lexer<'src>,
+    tok: Token,
+    reading_tok: Token,
 }
 
 impl<'src> Parser<'src> {
     fn new(lexer: Lexer<'src>) -> Self {
-        Self { lexer }
+        let mut parser = Self {
+            lexer,
+            tok: Token::EOF,
+            reading_tok: Token::EOF,
+        };
+
+        parser.read_token();
+        parser.read_token();
+
+        parser
+    }
+
+    fn parse(&self) -> Program {
+        let program = Vec::new();
+
+        while !self.have_token(Token::EOF) {}
+
+        program
+    }
+
+    fn have_token(&self, tok: Token) -> bool {
+        self.tok == tok
+    }
+
+    fn read_token(&mut self) {
+        self.tok = self.reading_tok.clone();
+        self.reading_tok = self.lexer.read_token();
     }
 }
 
@@ -121,7 +149,7 @@ impl<'src> Lexer<'src> {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 enum Token {
     Illegal(String),
     EOF,
@@ -133,6 +161,18 @@ enum Token {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parser_parses_empty() {
+        let src = "";
+        let lexer = Lexer::new(src);
+        let parser = Parser::new(lexer);
+
+        let expected: Program = Vec::new();
+        let actual = parser.parse();
+
+        assert_eq!(expected, actual);
+    }
 
     #[test]
     fn lexer_reads_empty() {
