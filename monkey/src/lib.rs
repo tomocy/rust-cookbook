@@ -14,7 +14,13 @@ impl<'src> Parser<'src> {
     }
 }
 
-enum Expression {}
+enum Expression {
+    Infix {
+        left: Box<Expression>,
+        operator: InfixOperator,
+        right: Box<Expression>,
+    },
+}
 
 enum InfixOperator {
     Plus,
