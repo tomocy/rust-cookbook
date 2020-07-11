@@ -4,6 +4,16 @@ pub fn run<T: Iterator<Item = String>>(_: T) -> Result<(), Box<dyn error::Error>
     Err("not implemented".into())
 }
 
+struct Parser<'src> {
+    lexer: Lexer<'src>,
+}
+
+impl<'src> Parser<'src> {
+    fn new(lexer: Lexer<'src>) -> Self {
+        Self { lexer }
+    }
+}
+
 struct Lexer<'src> {
     src: &'src str,
     pos: usize,
