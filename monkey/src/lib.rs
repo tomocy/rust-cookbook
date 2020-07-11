@@ -166,6 +166,7 @@ impl<'src> Lexer<'src> {
         match ch {
             Self::EOF => Token::EOF,
             b'+' => Token::Plus,
+            b';' => Token::Semicolon,
             b'"' => Token::String(self.read_string()),
             _ if self.have_digit() => Token::Int(self.read_number()),
             _ => Token::Illegal(String::from_utf8(vec![ch]).unwrap()),
@@ -333,6 +334,19 @@ mod tests {
         let mut lexer = Lexer::new(src);
 
         let expected = vec![Token::EOF];
+
+        for expected in expected.into_iter() {
+            let actual = lexer.read();
+            assert_eq!(expected, actual);
+        }
+    }
+
+    #[test]
+    fn lexer_reads_semicolon() {
+        let src = ";";
+        let mut lexer = Lexer::new(src);
+
+        let expected = vec![Token::Semicolon, Token::EOF];
 
         for expected in expected.into_iter() {
             let actual = lexer.read();
