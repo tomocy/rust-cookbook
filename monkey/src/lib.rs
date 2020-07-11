@@ -113,7 +113,9 @@ enum InfixOperator {
     Plus,
 }
 
-enum InfixOperatorPrecedence {}
+enum InfixOperatorPrecedence {
+    Additive,
+}
 
 struct Lexer<'src> {
     src: &'src str,
