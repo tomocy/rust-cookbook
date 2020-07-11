@@ -113,6 +113,15 @@ enum InfixOperator {
     Plus,
 }
 
+impl From<InfixOperator> for InfixOperatorPrecedence {
+    fn from(op: InfixOperator) -> Self {
+        match op {
+            InfixOperator::Plus => Self::Additive,
+            _ => Self::Lowest,
+        }
+    }
+}
+
 enum InfixOperatorPrecedence {
     Lowest,
     Additive,
