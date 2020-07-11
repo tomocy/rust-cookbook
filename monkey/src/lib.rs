@@ -33,8 +33,10 @@ impl<'src> Parser<'src> {
     }
 
     fn parse_expression(&self) -> Result<Expression, Box<dyn error::Error>> {
-        match self.tok {
+        let tok = self.tok.clone();
+        match tok {
             Token::Int(x) => Ok(Expression::Int(x)),
+            Token::String(x) => Ok(Expression::String(x)),
             _ => Err("invalid token".into()),
         }
     }
@@ -190,6 +192,18 @@ mod tests {
         let parser = Parser::new(lexer);
 
         let expected = Expression::Int(12345);
+        let actual = parser.parse_expression().unwrap();
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn parser_parses_string() {
+        let src = r#""string""#;
+        let lexer = Lexer::new(src);
+        let parser = Parser::new(lexer);
+
+        let expected = Expression::String("string".into());
         let actual = parser.parse_expression().unwrap();
 
         assert_eq!(expected, actual);
