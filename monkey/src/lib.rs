@@ -24,12 +24,23 @@ impl<'src> Parser<'src> {
         parser
     }
 
-    fn parse(&self) -> Result<Program, Box<dyn error::Error>> {
-        let program = Vec::new();
+    fn parse(&mut self) -> Result<Program, Box<dyn error::Error>> {
+        let mut program = Vec::new();
 
-        while !self.have_token(Token::EOF) {}
+        while !self.have_token(Token::EOF) {
+            program.push(self.parse_statement()?);
+            self.read();
+        }
 
         Ok(program)
+    }
+
+    fn parse_statement(&self) -> Result<Statement, Box<dyn error::Error>> {
+        self.parse_expression_statement()
+    }
+
+    fn parse_expression_statement(&self) -> Result<Statement, Box<dyn error::Error>> {
+        Ok(Statement::Expression(self.parse_expression()?))
     }
 
     fn parse_expression(&self) -> Result<Expression, Box<dyn error::Error>> {
@@ -177,7 +188,7 @@ mod tests {
     fn parser_parses_empty() {
         let src = "";
         let lexer = Lexer::new(src);
-        let parser = Parser::new(lexer);
+        let mut parser = Parser::new(lexer);
 
         let expected: Program = Vec::new();
         let actual = parser.parse().unwrap();
@@ -189,10 +200,10 @@ mod tests {
     fn parser_parses_int() {
         let src = "12345";
         let lexer = Lexer::new(src);
-        let parser = Parser::new(lexer);
+        let mut parser = Parser::new(lexer);
 
-        let expected = Expression::Int(12345);
-        let actual = parser.parse_expression().unwrap();
+        let expected = vec![Statement::Expression(Expression::Int(12345))];
+        let actual = parser.parse().unwrap();
 
         assert_eq!(expected, actual);
     }
@@ -201,10 +212,10 @@ mod tests {
     fn parser_parses_string() {
         let src = r#""string""#;
         let lexer = Lexer::new(src);
-        let parser = Parser::new(lexer);
+        let mut parser = Parser::new(lexer);
 
-        let expected = Expression::String("string".into());
-        let actual = parser.parse_expression().unwrap();
+        let expected = vec![Statement::Expression(Expression::String("string".into()))];
+        let actual = parser.parse().unwrap();
 
         assert_eq!(expected, actual);
     }
