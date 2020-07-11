@@ -64,6 +64,7 @@ enum Expression {
         right: Box<Expression>,
     },
     Int(i32),
+    String(String),
 }
 
 #[derive(Debug, PartialEq)]
