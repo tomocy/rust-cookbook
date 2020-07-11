@@ -24,12 +24,12 @@ impl<'src> Parser<'src> {
         parser
     }
 
-    fn parse(&self) -> Program {
+    fn parse(&self) -> Result<Program, Box<dyn error::Error>> {
         let program = Vec::new();
 
         while !self.have_token(Token::EOF) {}
 
-        program
+        Ok(program)
     }
 
     fn have_token(&self, tok: Token) -> bool {
@@ -170,7 +170,7 @@ mod tests {
         let parser = Parser::new(lexer);
 
         let expected: Program = Vec::new();
-        let actual = parser.parse();
+        let actual = parser.parse().unwrap();
 
         assert_eq!(expected, actual);
     }
