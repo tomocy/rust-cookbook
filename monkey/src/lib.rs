@@ -32,6 +32,13 @@ impl<'src> Parser<'src> {
         Ok(program)
     }
 
+    fn parse_expression(&self) -> Result<Expression, Box<dyn error::Error>> {
+        match self.tok {
+            Token::Int(x) => Ok(Expression::Int(x)),
+            _ => Err("invalid token".into()),
+        }
+    }
+
     fn have_token(&self, tok: Token) -> bool {
         self.tok == tok
     }
@@ -171,6 +178,18 @@ mod tests {
 
         let expected: Program = Vec::new();
         let actual = parser.parse().unwrap();
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn parser_parses_int() {
+        let src = "12345";
+        let lexer = Lexer::new(src);
+        let parser = Parser::new(lexer);
+
+        let expected = Expression::Int(12345);
+        let actual = parser.parse_expression().unwrap();
 
         assert_eq!(expected, actual);
     }
