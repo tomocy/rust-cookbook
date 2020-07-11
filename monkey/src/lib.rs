@@ -6,16 +6,16 @@ pub fn run<T: Iterator<Item = String>>(_: T) -> Result<(), Box<dyn error::Error>
 
 struct Parser<'src> {
     lexer: Lexer<'src>,
-    tok: Token,
-    reading_tok: Token,
+    curr_token: Token,
+    reading_token: Token,
 }
 
 impl<'src> Parser<'src> {
     fn new(lexer: Lexer<'src>) -> Self {
         let mut parser = Self {
             lexer,
-            tok: Token::EOF,
-            reading_tok: Token::EOF,
+            curr_token: Token::EOF,
+            reading_token: Token::EOF,
         };
 
         parser.read();
@@ -27,7 +27,7 @@ impl<'src> Parser<'src> {
     fn parse(&mut self) -> Result<Program, Box<dyn error::Error>> {
         let mut program = Vec::new();
 
-        while !self.have_token(Token::EOF) {
+        while !self.have_tokenen(Token::EOF) {
             program.push(self.parse_statement()?);
             self.read();
         }
@@ -48,11 +48,11 @@ impl<'src> Parser<'src> {
     }
 
     fn parse_prefix_expression(&self) -> Result<Expression, Box<dyn error::Error>> {
-        let tok = self.tok.clone();
-        match tok {
+        let curr_token = self.curr_token.clone();
+        match curr_token {
             Token::Int(x) => Ok(Expression::Int(x)),
             Token::String(x) => Ok(Expression::String(x)),
-            _ => Err("invalid token".into()),
+            _ => Err("invalid tokenen".into()),
         }
     }
 
@@ -71,22 +71,22 @@ impl<'src> Parser<'src> {
     }
 
     fn parse_infix_operator(&mut self) -> Result<InfixOperator, Box<dyn error::Error>> {
-        match self.tok {
+        match self.curr_token {
             Token::Plus => {
                 self.read();
                 Ok(InfixOperator::Plus)
             }
-            _ => Err("invalid token".into()),
+            _ => Err("invalid tokenen".into()),
         }
     }
 
-    fn have_token(&self, tok: Token) -> bool {
-        self.tok == tok
+    fn have_tokenen(&self, curr_token: Token) -> bool {
+        self.curr_token == curr_token
     }
 
     fn read(&mut self) {
-        self.tok = self.reading_tok.clone();
-        self.reading_tok = self.lexer.read();
+        self.curr_token = self.reading_token.clone();
+        self.reading_token = self.lexer.read();
     }
 }
 
@@ -120,7 +120,7 @@ enum InfixOperatorPrecedence {
 
 struct Lexer<'src> {
     src: &'src str,
-    pos: usize,
+    curr_pos: usize,
     reading_pos: usize,
 }
 
@@ -130,7 +130,7 @@ impl<'src> Lexer<'src> {
     fn new(src: &'src str) -> Self {
         Self {
             src,
-            pos: 0,
+            curr_pos: 0,
             reading_pos: 0,
         }
     }
@@ -160,13 +160,13 @@ impl<'src> Lexer<'src> {
         debug_assert_eq!(b'"', self.char());
         self.read_char();
 
-        let begin = self.pos;
+        let begin = self.curr_pos;
 
         while self.have_letter() {
             self.read_char();
         }
 
-        let end = self.pos;
+        let end = self.curr_pos;
 
         debug_assert_eq!(b'"', self.char());
         self.read_char();
@@ -175,21 +175,21 @@ impl<'src> Lexer<'src> {
     }
 
     fn read_number(&mut self) -> i32 {
-        let begin = self.pos;
+        let begin = self.curr_pos;
 
         while self.have_digit() {
             self.read_char();
         }
 
-        self.src[begin..self.pos].parse().unwrap()
+        self.src[begin..self.curr_pos].parse().unwrap()
     }
 
     fn read_char(&mut self) {
-        if self.pos >= self.src.len() {
+        if self.curr_pos >= self.src.len() {
             return;
         }
 
-        self.pos = self.reading_pos;
+        self.curr_pos = self.reading_pos;
         self.reading_pos += 1;
     }
 
@@ -209,10 +209,10 @@ impl<'src> Lexer<'src> {
     }
 
     fn char(&self) -> u8 {
-        if self.pos >= self.src.len() {
+        if self.curr_pos >= self.src.len() {
             Self::EOF
         } else {
-            self.src.as_bytes()[self.pos]
+            self.src.as_bytes()[self.curr_pos]
         }
     }
 }
