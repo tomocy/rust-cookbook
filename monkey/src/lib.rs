@@ -27,6 +27,7 @@ impl<'src> Lexer<'src> {
         let ch = self.char();
         match ch {
             Self::EOF => Token::EOF,
+            b'+' => Token::Plus,
             b'"' => Token::String(self.read_string()),
             _ if self.have_digit() => Token::Int(self.read_number()),
             _ => Token::Illegal(String::from_utf8(vec![ch]).unwrap()),
@@ -93,6 +94,7 @@ impl<'src> Lexer<'src> {
 enum Token {
     Illegal(String),
     EOF,
+    Plus,
     Int(i32),
     String(String),
 }
@@ -107,6 +109,19 @@ mod tests {
         let mut lexer = Lexer::new(src);
 
         let expected = vec![Token::EOF];
+
+        for expected in expected.into_iter() {
+            let actual = lexer.read_token();
+            assert_eq!(expected, actual);
+        }
+    }
+
+    #[test]
+    fn lexer_reads_plus() {
+        let src = "+";
+        let mut lexer = Lexer::new(src);
+
+        let expected = vec![Token::Plus, Token::EOF];
 
         for expected in expected.into_iter() {
             let actual = lexer.read_token();
