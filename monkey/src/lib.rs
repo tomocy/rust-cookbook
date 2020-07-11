@@ -114,6 +114,7 @@ enum InfixOperator {
 }
 
 enum InfixOperatorPrecedence {
+    Lowest,
     Additive,
 }
 
