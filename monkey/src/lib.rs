@@ -53,24 +53,18 @@ impl<'src> Parser<'src> {
     ) -> Result<Expression, Box<dyn error::Error>> {
         let prec = prec.into();
         let mut exp = self.parse_prefix_expression()?;
-        while prec < self.curr_token.clone().into() {
+        while prec < self.reading_token.clone().into() {
+            self.read();
             exp = self.parse_infix_expression(exp)?;
         }
 
         Ok(exp)
     }
 
-    fn parse_prefix_expression(&mut self) -> Result<Expression, Box<dyn error::Error>> {
-        let curr_token = self.curr_token.clone();
-        match curr_token {
-            Token::Int(x) => {
-                self.read();
-                Ok(Expression::Int(x))
-            }
-            Token::String(x) => {
-                self.read();
-                Ok(Expression::String(x))
-            }
+    fn parse_prefix_expression(&self) -> Result<Expression, Box<dyn error::Error>> {
+        match self.curr_token.clone() {
+            Token::Int(x) => Ok(Expression::Int(x)),
+            Token::String(x) => Ok(Expression::String(x)),
             _ => Err("invalid tokenen".into()),
         }
     }
@@ -80,6 +74,8 @@ impl<'src> Parser<'src> {
         left: Expression,
     ) -> Result<Expression, Box<dyn error::Error>> {
         let operator = self.parse_infix_operator()?;
+        self.read();
+
         let right = self.parse_expression(operator)?;
 
         Ok(Expression::Infix {
@@ -89,12 +85,9 @@ impl<'src> Parser<'src> {
         })
     }
 
-    fn parse_infix_operator(&mut self) -> Result<InfixOperator, Box<dyn error::Error>> {
+    fn parse_infix_operator(&self) -> Result<InfixOperator, Box<dyn error::Error>> {
         match self.curr_token {
-            Token::Plus => {
-                self.read();
-                Ok(InfixOperator::Plus)
-            }
+            Token::Plus => Ok(InfixOperator::Plus),
             _ => Err("invalid tokenen".into()),
         }
     }
