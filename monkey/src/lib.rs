@@ -14,6 +14,10 @@ impl<'src> Parser<'src> {
     }
 }
 
+enum InfixOperator {
+    Plus,
+}
+
 struct Lexer<'src> {
     src: &'src str,
     pos: usize,
